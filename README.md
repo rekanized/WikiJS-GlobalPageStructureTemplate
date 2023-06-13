@@ -1,4 +1,4 @@
-# WikiJS-GlobalPageStructureTemplate
+# Global page structure and page content copying
 How to copy a complete page tree (used for Customer templates for example)
 
 You will first need to create an API key through the application for this to work.
