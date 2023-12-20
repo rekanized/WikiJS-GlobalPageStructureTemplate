@@ -1,3 +1,34 @@
+#Connection
+$token = "Bearer <API KEY>"
+$header = @{Authorization = "$token"}
+$wikiUrl = "https://<WIKIJSAddress>/graphql"
+
+#Customer information
+$customerName = "Test customer"
+$customerID = "CUS101010"
+
+#Template information
+$templateParentPath = "Customers/CUSTOMER-TEMPLATE" # This is the location of your customer template
+$templateName = $templateParentPath.split("/") | Select-Object -Last 1
+
+#Get all template pages
+$pages = Get-TemplatePages -ParentPath $templateParentPath
+
+#Loop through all template pages and create them in the correct structure
+$pages.data | ForEach-Object {
+    $page = $_.pages.single
+
+    #Set the name of the Customer for the parent file
+    if ($page.Path -eq "$templateParentPath"){
+        $page.Title = $customerName
+    }
+
+    #Set the new page path with the customer name
+    $page.Path = $page.Path -replace("$templateName","$customerID")
+
+    New-Page -Content $page.Content -Title $page.Title -Path $page.Path
+}
+
 function Get-TemplatePages {
     param(
         [parameter(mandatory)]
@@ -65,35 +96,4 @@ function New-Page {
 
     #Create page
     Invoke-WebRequest -Uri $wikiUrl -Method POST -Body $body -Headers $header -ContentType "application/json;charset=utf-8"
-}
-
-#Connection
-$token = "Bearer <API KEY>"
-$header = @{Authorization = "$token"}
-$wikiUrl = "<WIKIJSAddress>/graphql"
-
-#Customer information
-$customerName = "Test customer"
-$customerID = "CUS101010"
-
-#Template information
-$templateParentPath = "Customers/CUSTOMER-TEMPLATE"
-$templateName = $templateParentPath.split("/") | Select-Object -Last 1
-
-#Get all template pages
-$pages = Get-TemplatePages -ParentPath $templateParentPath
-
-#Loop through all template pages and create them in the correct structure
-$pages.data | ForEach-Object {
-    $page = $_.pages.single
-
-    #Set the name of the Customer for the parent file
-    if ($page.Path -eq "$templateParentPath"){
-        $page.Title = $customerName
-    }
-
-    #Set the new page path with the customer name
-    $page.Path = $page.Path -replace("$templateName","$customerID")
-
-    New-Page -Content $page.Content -Title $page.Title -Path $page.Path
 }
